@@ -66,7 +66,7 @@ class DieFragment : Fragment() {
 
 
     companion object {
-        fun newInstance (sides: Int) = DieFragment().apply{
+        fun newInstance (sides: Int=6) = DieFragment().apply{
             arguments = Bundle().apply{
                 putInt(DIESIDE, sides)
             }
