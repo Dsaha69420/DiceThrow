@@ -6,29 +6,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import kotlin.random.Random
+import androidx.lifecycle.ViewModelProvider
 
 class DieFragment : Fragment() {
 
     private val DIESIDE = "sidenumber"
-    private val ROLL_KEY = "current_rule"
 
     lateinit var dieTextView: TextView
 
-    var currentRoll = 1
-
-    var dieSides: Int = 6
+    private val dieViewModel: DieViewModel by lazy {
+        ViewModelProvider(this)[DieViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         arguments?.let {
             it.getInt(DIESIDE).run {
-                dieSides = this
+                dieViewModel.dieSides = this
             }
-        }
-
-        savedInstanceState?.run{
-          currentRoll = getInt(ROLL_KEY)
         }
     }
 
@@ -36,7 +32,6 @@ class DieFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_die, container, false).apply {
             dieTextView = findViewById(R.id.dieTextView)
         }
@@ -45,32 +40,24 @@ class DieFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if(currentRoll == 0)
+        dieViewModel.currentRoll.observe(viewLifecycleOwner) {
+            dieTextView.text = it.toString()
+        }
 
-        throwDie()
-        else
-        dieTextView.text = currentRoll.toString()
-
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putInt(ROLL_KEY,currentRoll)
+        if (dieViewModel.currentRoll.value == 0) {
+            dieViewModel.throwDie()
+        }
     }
 
     fun throwDie() {
-        currentRoll = Random.nextInt(1,dieSides+ 1)
-        dieTextView.text = currentRoll.toString()
+        dieViewModel.throwDie()
     }
 
-
     companion object {
-        fun newInstance (sides: Int=6) = DieFragment().apply{
+        fun newInstance (sides: Int = 6) = DieFragment().apply{
             arguments = Bundle().apply{
                 putInt(DIESIDE, sides)
             }
         }
-
     }
 }
